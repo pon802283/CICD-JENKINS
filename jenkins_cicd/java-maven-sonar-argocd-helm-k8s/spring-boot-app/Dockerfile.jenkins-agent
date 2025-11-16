@@ -1,0 +1,19 @@
+# Jenkins inbound agent base image (contains JDK, JNLP, etc.)
+FROM jenkins/inbound-agent:latest
+
+USER root
+
+# Install Docker CLI so Jenkins can build & push images
+RUN apt-get update && \
+    apt-get install -y docker.io docker-compose-plugin
+
+# Install Maven for building Java projects
+RUN apt-get install -y maven
+
+# Install Git
+RUN apt-get install -y git
+
+# Give Jenkins user access to Docker
+RUN usermod -aG docker jenkins
+
+USER jenkins
