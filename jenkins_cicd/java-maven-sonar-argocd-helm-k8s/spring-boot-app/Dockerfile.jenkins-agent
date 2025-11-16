@@ -1,19 +1,26 @@
-# Jenkins inbound agent base image (contains JDK, JNLP, etc.)
 FROM jenkins/inbound-agent:latest
 
 USER root
 
-# Install Docker CLI so Jenkins can build & push images
+# Install dependencies
 RUN apt-get update && \
-    apt-get install -y docker.io docker-compose-plugin
+    apt-get install -y ca-certificates curl gnupg lsb-release git maven
 
-# Install Maven for building Java projects
-RUN apt-get install -y maven
+# Install Docker CLI (official method)
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | \
+        gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo \
+        "deb [arch=$(dpkg --print-architecture) \
+        signed-by=/etc/apt/keyrings/docker.gpg] \
+        https://download.docker.com/linux/debian \
+        $(lsb_release -cs) stable" | \
+        tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli docker-compose-plugin
 
-# Install Git
-RUN apt-get install -y git
-
-# Give Jenkins user access to Docker
+# Add Jenkins user to Docker group
 RUN usermod -aG docker jenkins
 
 USER jenkins
