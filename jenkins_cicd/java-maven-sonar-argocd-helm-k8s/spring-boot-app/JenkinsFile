@@ -1,4 +1,5 @@
 pipeline {
+
   agent {
     docker {
       image 'pon802283/jenkins-agent:v1'
@@ -11,6 +12,7 @@ pipeline {
     DOCKER_REPO    = "pon802283/ultimate-cicd"
     GIT_USER_NAME  = "pon802283"
     GIT_REPO_NAME  = "CICD-JENKINS"
+
     APP_PATH       = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
     MANIFEST_PATH  = "java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
   }
@@ -22,6 +24,17 @@ pipeline {
         git branch: 'main',
             url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git",
             credentialsId: 'b4a023c8-2eb1-4be8-86d8-96ddd6d05921'
+      }
+    }
+
+    stage('Debug Workspace') {
+      steps {
+        sh '''
+          echo "PWD:"
+          pwd
+          echo "LISTING WORKSPACE:"
+          ls -R
+        '''
       }
     }
 
