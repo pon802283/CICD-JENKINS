@@ -23,7 +23,7 @@ pipeline {
       steps {
         git branch: 'main',
             url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git",
-            credentialsId: 'b4a023c8-2eb1-4be8-86d8-96ddd6d05921'
+            credentialsId: 'git'
       }
     }
 
