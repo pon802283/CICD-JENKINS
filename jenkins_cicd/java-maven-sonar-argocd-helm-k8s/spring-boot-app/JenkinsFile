@@ -13,7 +13,7 @@ pipeline {
     GIT_USER_NAME  = "pon802283"
     GIT_REPO_NAME  = "CICD-JENKINS"
 
-    APP_PATH       = "cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app"
+    APP_PATH       = "jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app"
     MANIFEST_PATH  = "java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
   }
 
