@@ -9,7 +9,7 @@ pipeline {
 
   environment {
     SONAR_URL      = "http://35.93.40.251:9000"
-    DOCKER_REPO    = "pon802283/ultimate-cicd"
+    DOCKER_REPO    = "pon802283/jenkins-demo"
     GIT_USER_NAME  = "pon802283"
     GIT_REPO_NAME  = "CICD-JENKINS"
 
