@@ -80,7 +80,7 @@ pipeline {
 
     stage('Update Deployment Manifest') {
       steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'Git', variable: 'GITHUB_TOKEN')]) {
           sh """
             rm -rf cicd_dep
             git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git cicd_dep
