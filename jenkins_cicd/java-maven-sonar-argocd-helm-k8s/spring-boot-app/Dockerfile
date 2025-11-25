@@ -1,4 +1,4 @@
-FROM jenkins/inbound-agent:latest
+FROM jenkins/agent:latest
 
 USER root
 
@@ -19,3 +19,4 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
 RUN groupadd -f docker && usermod -aG docker jenkins
 
 USER jenkins
+
