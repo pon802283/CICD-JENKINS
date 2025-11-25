@@ -23,7 +23,7 @@ pipeline {
       steps {
         git branch: 'main',
             url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git",
-            credentialsId: 'git'
+            credentialsId: 'Git'
       }
     }
 
@@ -49,7 +49,7 @@ pipeline {
 
     stage('SonarQube Analysis') {
       steps {
-        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_TOKEN')]) {
+        withCredentials([string(credentialsId: 'sonarQube', variable: 'SONAR_TOKEN')]) {
           sh """
             cd ${APP_PATH}
             mvn sonar:sonar \
