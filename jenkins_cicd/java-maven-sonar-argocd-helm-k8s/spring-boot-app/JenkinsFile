@@ -9,7 +9,8 @@ pipeline {
 
   environment {
     SONAR_URL      = "http://35.93.40.251:9000"
-    DOCKER_REPO    = "pon802283/jenkins-demo"
+    DOCKER_REPO    = "pon802283/ultimate-cicd"
+
     GIT_USER_NAME  = "pon802283"
     GIT_REPO_NAME  = "CICD-JENKINS"
 
@@ -19,6 +20,7 @@ pipeline {
 
   stages {
 
+    /* -------------------- CHECKOUT -------------------- */
     stage('Checkout') {
       steps {
         git branch: 'main',
@@ -27,17 +29,19 @@ pipeline {
       }
     }
 
+    /* -------------------- DEBUG -------------------- */
     stage('Debug Workspace') {
       steps {
         sh '''
-          echo "PWD:"
+          echo "CURRENT DIRECTORY:"
           pwd
-          echo "LISTING WORKSPACE:"
+          echo "FILES:"
           ls -R
         '''
       }
     }
 
+    /* -------------------- MAVEN BUILD -------------------- */
     stage('Build Maven App') {
       steps {
         sh """
@@ -47,6 +51,7 @@ pipeline {
       }
     }
 
+    /* -------------------- SONARQUBE -------------------- */
     stage('SonarQube Analysis') {
       steps {
         withCredentials([string(credentialsId: 'sonarQube', variable: 'SONAR_TOKEN')]) {
@@ -60,11 +65,13 @@ pipeline {
       }
     }
 
+    /* -------------------- DOCKER BUILD & PUSH -------------------- */
     stage('Build & Push Docker Image') {
       environment {
         IMAGE_TAG = "${DOCKER_REPO}:${BUILD_NUMBER}"
       }
       steps {
+
         sh """
           cd ${APP_PATH}
           docker build -t ${IMAGE_TAG} .
@@ -78,21 +85,23 @@ pipeline {
       }
     }
 
+    /* -------------------- UPDATE DEPLOYMENT MANIFEST -------------------- */
     stage('Update Deployment Manifest') {
       steps {
         withCredentials([string(credentialsId: 'Git', variable: 'GITHUB_TOKEN')]) {
-          sh """
-            rm -rf java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests
-            git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests
 
-            cd java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests 
+          sh """
+            rm -rf cicd_dep
+            git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git cicd_dep
+
+            cd cicd_dep
             git config user.email "pon802283@gmail.com"
             git config user.name "pon802283"
 
             sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" ${MANIFEST_PATH}
 
             git add .
-            git commit -m "Update deployment image to build ${BUILD_NUMBER}" || echo "No changes"
+            git commit -m "Update deployment image to build ${BUILD_NUMBER}" || echo "No changes to commit"
             git push origin main
           """
         }
