@@ -82,10 +82,10 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'Git', variable: 'GITHUB_TOKEN')]) {
           sh """
-            rm -rf cicd_dep
-            git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git cicd_dep
+            rm -rf java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests
+            git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests
 
-            cd cicd_dep
+            cd java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests 
             git config user.email "pon802283@gmail.com"
             git config user.name "pon802283"
 
