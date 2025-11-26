@@ -2,7 +2,7 @@ pipeline {
 
   agent {
     docker {
-      image 'pon802283/jenkins-agent:v1'
+      image 'pon802283/jenkins-demo:latest'
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
