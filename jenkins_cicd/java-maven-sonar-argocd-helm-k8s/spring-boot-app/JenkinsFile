@@ -56,10 +56,10 @@ pipeline {
 
         stage('Update Deployment Manifests') {
             steps {
-                withCredentials([string(credentialsId: 'GitHub-cred', variable: 'G_TOKEN')]) {
+                withCredentials([string(credentialsId: 'GitHub-cred', variable: 'GitHub_TOKEN')]) {
                     sh '''
                     rm -rf CICD-DEPLOY
-                    git clone https://${G_TOKEN}@github.com/pon802283/CICD-DEPLOY.git
+                    git clone https://${GitHub_TOKEN}@github.com/pon802283/CICD-DEPLOY.git
 
                     cd CICD-DEPLOY
 
