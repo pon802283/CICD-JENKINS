@@ -1,18 +1,12 @@
-FROM jenkins/agent:latest
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-USER root
+# -------- RUNTIME IMAGE --------
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
 
-# Install Java, Maven, Docker CLI, Git, Curl
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    maven \
-    docker.io \
-    git \
-    curl \
-    unzip \
-    && apt-get clean
-
-# Verify installations
-RUN java -version && mvn -version && docker --version && git --version
-
-USER jenkins
