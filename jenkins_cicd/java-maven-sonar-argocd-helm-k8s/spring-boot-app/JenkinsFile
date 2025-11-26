@@ -54,25 +54,20 @@ pipeline {
             }
         }
 
-        stage('Update Deployment Manifests') {
+        stage('Update Local Manifest File') {
             steps {
-                withCredentials([string(credentialsId: 'GitHub-cred', variable: 'GitHub_TOKEN')]) {
-                    sh '''
-                    rm -rf CICD-DEPLOY
-                    git clone https://${GitHub_TOKEN}@github.com/pon802283/CICD-DEPLOY.git
+                sh '''
+                cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests
 
-                    cd CICD-DEPLOY
+                sed -i "s|replaceImageTag|${BUILD_NUMBER}|g" deployment.yml
 
-                    git config user.email "pon802283@gmail.com"
-                    git config user.name "ponsankar"
+                git config user.email "pon802283@gmail.com"
+                git config user.name "ponsankar"
 
-                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" deployment.yml
-
-                    git add deployment.yml
-                    git commit -m "Updated image version ${BUILD_NUMBER}" || echo "No changes"
-                    git push origin main
-                    '''
-                }
+                git add deployment.yml
+                git commit -m "Updated image tag ${BUILD_NUMBER}" || echo "No changes to commit"
+                git push origin main
+                '''
             }
         }
 
