@@ -1,94 +1,80 @@
 pipeline {
-  agent {
-    docker {
-      image 'pon802283/jenkins-demo:latest'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
-
-  stages {
-
-    stage('Checkout') {
-      steps {
-        echo "Checking out source code..."
-        git branch: 'main',
-            credentialsId: 'GitHub-cred',
-            url: 'https://github.com/pon802283/CICD-JENKINS.git'
-      }
-    }
-
-    stage('Build and Test') {
-      steps {
-        sh '''
-          ls -ltr
-          cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-          mvn clean package
-        '''
-      }
-    }
-
-    stage('Static Code Analysis') {
-      environment {
-        SONAR_URL = "http://34.222.141.93:9000"
-      }
-      steps {
-        withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh '''
-            cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            mvn sonar:sonar \
-              -Dsonar.login=$SONAR_AUTH_TOKEN \
-              -Dsonar.host.url=$SONAR_URL
-          '''
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-17'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
         }
-      }
     }
 
-    stage('Build and Push Docker Image') {
-      environment {
+    environment {
+        SONAR_URL = "http://3.142.46.240:9000"
         DOCKER_IMAGE = "pon802283/cicd:${BUILD_NUMBER}"
-      }
-      steps {
-        script {
-          sh '''
-            cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            docker build -t ${DOCKER_IMAGE} .
-          '''
-
-          def dockerImage = docker.image("${DOCKER_IMAGE}")
-
-          docker.withRegistry('https://index.docker.io/v1/', "Docker-cred") {
-            dockerImage.push()
-          }
-        }
-      }
     }
 
-    stage('Update Deployment File') {
-      environment {
-        GIT_REPO_NAME = "cicd_dep"
-        GIT_USER_NAME = "pon802283"
-      }
-      steps {
-        withCredentials([string(credentialsId: 'GitHub-cred', variable: 'GITHUB_TOKEN')]) {
-          sh '''
-            rm -rf cicd_dep
+    stages {
 
-            git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git
-            cd cicd_dep
-
-            git config user.email "pon802283@gmail.com"
-            git config user.name "pon802283"
-
-            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
-              java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-
-            git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-            git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-            git push origin main
-          '''
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', 
+                    credentialsId: 'GitHub-cred',
+                    url: 'https://github.com/pon802283/CICD-JENKINS.git'
+            }
         }
-      }
-    }
 
-  }
+        stage('Build & Test') {
+            steps {
+                sh '''
+                cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                mvn clean package
+                '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'SonarQube', variable: 'TOKEN')]) {
+                    sh '''
+                    cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                    mvn sonar:sonar -Dsonar.login=$TOKEN -Dsonar.host.url=${SONAR_URL}
+                    '''
+                }
+            }
+        }
+
+        stage('Build & Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'Docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                    cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                    docker build -t ${DOCKER_IMAGE} .
+                    echo "$PASS" | docker login -u "$USER" --password-stdin
+                    docker push ${DOCKER_IMAGE}
+                    '''
+                }
+            }
+        }
+
+        stage('Update Deployment Manifests') {
+            steps {
+                withCredentials([string(credentialsId: 'GitHub-cred', variable: 'G_TOKEN')]) {
+                    sh '''
+                    rm -rf CICD-DEPLOY
+                    git clone https://${G_TOKEN}@github.com/pon802283/CICD-DEPLOY.git
+
+                    cd CICD-DEPLOY
+
+                    git config user.email "pon802283@gmail.com"
+                    git config user.name "ponsankar"
+
+                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" deployment.yml
+
+                    git add deployment.yml
+                    git commit -m "Updated image version ${BUILD_NUMBER}" || echo "No changes"
+                    git push origin main
+                    '''
+                }
+            }
+        }
+
+    }
 }
