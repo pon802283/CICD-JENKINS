@@ -30,7 +30,7 @@ pipeline {
             }
         }
 
-        //stage('SonarQube Analysis') {
+        /*stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube', variable: 'TOKEN')]) {
                     sh '''
@@ -39,7 +39,7 @@ pipeline {
                     '''
                 }
             }
-        }//
+        }*/
 
         stage('Build & Push Docker Image') {
             steps {
