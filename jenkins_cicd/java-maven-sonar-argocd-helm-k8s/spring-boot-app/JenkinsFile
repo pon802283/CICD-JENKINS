@@ -67,7 +67,7 @@ pipeline {
         GIT_USER_NAME = "pon802283"
       }
       steps {
-        withCredentials([string(credentialsId: 'Git', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'GitHub-cred', variable: 'GITHUB_TOKEN')]) {
           sh '''
             rm -rf cicd_dep
 
