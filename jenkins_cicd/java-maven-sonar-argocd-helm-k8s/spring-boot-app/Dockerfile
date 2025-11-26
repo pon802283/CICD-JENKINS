@@ -1,13 +1,18 @@
-# You can change this base image to anything else
-# But make sure to use the correct version of Java
-FROM adoptopenjdk/openjdk11:alpine-jre
+FROM jenkins/agent:latest
 
-# Simply the artifact path
-ARG artifact=target/spring-boot-web.jar
+USER root
 
-WORKDIR /opt/app
+# Install Java, Maven, Docker CLI, Git, Curl
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk \
+    maven \
+    docker.io \
+    git \
+    curl \
+    unzip \
+    && apt-get clean
 
-COPY ${artifact} app.jar
+# Verify installations
+RUN java -version && mvn -version && docker --version && git --version
 
-# This should not be changed
-ENTRYPOINT ["java","-jar","app.jar"]
+USER jenkins
