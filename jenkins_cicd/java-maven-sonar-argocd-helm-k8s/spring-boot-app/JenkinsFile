@@ -10,18 +10,20 @@ pipeline {
 
     stage('Checkout') {
       steps {
-        sh 'echo passed'
+        echo "Checking out source code..."
         git branch: 'main',
             credentialsId: 'GitHub-cred',
             url: 'https://github.com/pon802283/CICD-JENKINS.git'
-
       }
     }
 
     stage('Build and Test') {
       steps {
-        sh 'ls -ltr'
-        sh 'cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
+        sh '''
+          ls -ltr
+          cd jenkins_cicd/java-maven-sonar-argocd-helm-k8s/spring-boot-app
+          mvn clean package
+        '''
       }
     }
 
@@ -43,7 +45,7 @@ pipeline {
 
     stage('Build and Push Docker Image') {
       environment {
-        DOCKER_IMAGE = "pon802283/ultimate-cicd:${BUILD_NUMBER}"
+        DOCKER_IMAGE = "pon802283/cicd:${BUILD_NUMBER}"
       }
       steps {
         script {
@@ -88,5 +90,5 @@ pipeline {
       }
     }
 
-  } // END stages
-} // END pipeline
+  }
+}
