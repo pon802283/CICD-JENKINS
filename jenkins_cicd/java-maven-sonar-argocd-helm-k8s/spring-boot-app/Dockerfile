@@ -1,4 +1,4 @@
-FROM jenkins/agent:latest
+FROM jenkins-demo:latest
 
 USER root
 
