@@ -12,8 +12,8 @@ pipeline {
       steps {
         sh 'echo passed'
         git branch: 'main',
-        credentialsId: 'GitHub-cred',
-        url: 'https://github.com/pon802283/jenkins_cicd.git'
+            credentialsId: 'GitHub-cred',
+            url: 'https://github.com/pon802283/jenkins_cicd.git'
 
       }
     }
