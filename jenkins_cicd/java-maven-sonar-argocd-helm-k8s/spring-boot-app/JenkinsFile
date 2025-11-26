@@ -54,7 +54,7 @@ pipeline {
     /* -------------------- SONARQUBE -------------------- */
     stage('SonarQube Analysis') {
       steps {
-        withCredentials([string(credentialsId: 'sonarQube', variable: 'SONAR_TOKEN')]) {
+        withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
           sh """
             cd ${APP_PATH}
             mvn sonar:sonar \
